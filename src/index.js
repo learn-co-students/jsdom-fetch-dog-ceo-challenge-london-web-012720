@@ -23,18 +23,54 @@ const renderDogs = dogs => {
 	dogsImgEl.append(dogImage);
 };
 
+//SHOW DOG
+const displayDog = breed => {
+	console.log(breed);
+	const dogsImgEl = document.getElementById("dog-image-container");
+	dogsImgEl.innerHTML = "";
+	const dogImage = document.createElement("img");
+	dogImage.src = breed.message;
+
+	dogsImgEl.append(dogImage);
+};
+
 //CHALLENGE 2
 const fetchBreeds = () => {
 	fetch(breedUrl)
 		.then(resp => resp.json())
-		.then(breedData => renderBreeds(breedData));
+		.then(breedData => {
+			const allBreeds = breedObjectToArray(breedData);
+			renderBreeds(allBreeds);
+
+			//DROPDOWN - CHALLENGE 4
+			const initialisedArray = allBreeds.map(breed => breed.charAt(0)).sort()
+			const uniqueArray = [...new Set(initialisedArray)];
+
+			const breedDrops = document.querySelector("#breed-dropdown");
+
+			breedDrops.querySelectorAll("option").forEach(el => el.remove());
+
+			breedDrops.options[breedDrops.options.length] = new Option("all");
+			for (index in uniqueArray) {
+				breedDrops.options[breedDrops.options.length] = new Option(
+					uniqueArray[index]
+				);
+			}
+			// console.log("test"); //list is the same as BreedLi
+			breedDrops.addEventListener("change", () => {
+				const firstLetter = document.querySelector("#breed-dropdown").value;
+
+				const breedsWithFirstLetter =
+					firstLetter === "all"
+						? allBreeds
+						: allBreeds.filter(breed => breed[0] === firstLetter);
+
+				renderBreeds(breedsWithFirstLetter);
+			});
+		});
 };
 
-const renderBreeds = breedData => {
-	const breedUl = document.querySelector("#dog-breeds");
-
-	console.log(breedData);
-
+const breedObjectToArray = breedData => {
 	const breeds = Object.keys(breedData.message);
 
 	const allBreeds = [];
@@ -52,54 +88,46 @@ const renderBreeds = breedData => {
 		}
 	});
 
-	allBreeds.forEach(breed => {
+	return allBreeds;
+};
+
+const renderBreeds = breeds => {
+	const breedUl = document.querySelector("#dog-breeds");
+
+	breedUl.innerText = "";
+
+	breeds.forEach(breed => {
 		const breedLi = document.createElement("li");
 		breedLi.innerText = breed;
 		breedUl.append(breedLi);
-    
-    //CHALLENGE 3
-        breedLi.addEventListener("click", () => {
-        console.log(breedLi)
-        const textColour = breedLi.style.color; 
 
-        if (textColour === 'black') {
-            breedLi.style.color = "yellow"
-        } else {
-            breedLi.style.color = "black"
-        }
+		//SHOW DOG - EXTRA CHALLENGE
+		breedLi.addEventListener("click", () => {
+			if (breed.trim().indexOf(" ") != -1) {
+				const [subbreed, breeds] = breed.split(" ");
+				fetch(`https://dog.ceo/api/breed/${breeds}/${subbreed}/images/random`)
+					.then(resp => resp.json())
+					.then(breed => displayDog(breed));
+			} else {
+				fetch(`https://dog.ceo/api/breed/${breed}/images/random`)
+					.then(resp => resp.json())
+					.then(breed => displayDog(breed));
+			}
+			console.log(breed);
+		});
 
+		//CHALLENGE 3
+		breedLi.addEventListener("click", () => {
+			console.log(breedLi);
+			const textColour = breedLi.style.color;
 
-        })
-    
-    
-    
-    
-    });
-
-    
-        
-       
-    
-    
-    
-
-    //DROPDOWN - CHALLENGE 4
-	const breedDrops = document.querySelector("#breed-dropdown");
-
-	// console.log("test");
-	breedDrops.addEventListener("change", () => {
-		const value = document.querySelector("#breed-dropdown").value;
-		const lists = document.querySelectorAll("li");
-		lists.forEach(list => {
-			list.style.display = "none";
-			if (list.innerText[0] === value) {
-				list.style.display = "block";
+			if (textColour === "black") {
+				breedLi.style.color = "yellow";
+			} else {
+				breedLi.style.color = "black";
 			}
 		});
-    });
-    
-
-   
+	});
 };
 
 init();

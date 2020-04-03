@@ -1,5 +1,21 @@
 # Fetch Dog CEO Challenge
 
+Click on breed name to get random image of that breed
+Add "All" option to dropdown which displays all the breeds again
+DYNAMICALLY update the options in the dropdown to only include letters
+that exist in the breeds array
+
+chiuaua
+great dane
+giant sch
+sch
+
+[
+    "c",
+    "g",
+    "s"
+]
+
 ## Challenge 1
 
 This repository includes an `index.html` file that loads an `index.js` file.
